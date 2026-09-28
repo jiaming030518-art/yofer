@@ -1,6 +1,10 @@
 # Local working files, downloads, and visual QA captures
 work/
 
+# Original full-resolution images kept locally, not published
+_unused-assets-backup/
+outputs/assets/_orig-backup/
+
 # Operating system files
 .DS_Store
 Thumbs.db
