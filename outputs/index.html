@@ -474,10 +474,6 @@ section{position:relative}
 #catalogView .catalog-card:hover .catalog-card-media img{transform:scale(1.025)}
 #catalogView .catalog-card-pending{display:grid;place-items:center;height:100%;
   color:var(--ink-3);font-family:"DM Mono",monospace;font-size:.62rem;letter-spacing:.1em}
-#catalogView .catalog-status{position:absolute;top:12px;left:12px;padding:6px 8px;
-  background:var(--accent);color:var(--ink);font-family:"DM Mono",monospace;font-size:.56rem;
-  letter-spacing:.08em;text-transform:uppercase}
-#catalogView .catalog-status.pending{background:rgba(246,247,246,.9);color:var(--ink-2)}
 #catalogView .catalog-card-body{display:flex;flex-direction:column;min-height:142px;padding:18px 20px 20px}
 #catalogView .catalog-card-body .mono{margin:0;color:var(--ink-3)}
 #catalogView .catalog-card-body h4{margin:8px 0 4px;font-size:1.12rem;line-height:1.08;
@@ -1080,7 +1076,7 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
       const ready=Boolean(model.hasDetail);
       const media=ready&&model.image?`<img src="${model.image}" alt="YOFER ${model.brand} ${model.name} body kit" loading="lazy">`:'<span class="catalog-card-pending">Image pending</span>';
       const body=`<div class="catalog-card-body"><p class="mono">${model.brand}</p><h4>${model.name}</h4><p>${model.year||'Model platform'}${model.type?` · ${model.type}`:''}</p><span class="catalog-card-link">${ready?'Explore model':'Coming soon'} <span aria-hidden="true">${ready?'↗':'—'}</span></span></div>`;
-      const card=`<div class="catalog-card-media">${media}<span class="catalog-status${ready?'':' pending'}">${ready?'Available':'Coming soon'}</span></div>${body}`;
+      const card=`<div class="catalog-card-media">${media}</div>${body}`;
       return ready?`<a class="catalog-card" href="#model=${model.slug}" data-route="model" data-slug="${model.slug}">${card}</a>`:`<article class="catalog-card" aria-label="${model.brand} ${model.name}, coming soon">${card}</article>`;
     }
     function renderCatalogPage(){
