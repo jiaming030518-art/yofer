@@ -98,9 +98,9 @@ a,button{transition:color .2s ease,background-color .2s ease,border-color .2s ea
               background:var(--ink);color:#fff;font-size:.76rem;font-weight:800;
               letter-spacing:.03em;text-transform:uppercase}
 .whatsapp-btn:hover{background:var(--accent);color:var(--ink)}
-.menu-toggle{display:none;width:44px;height:44px;border:1px solid var(--line);
-             background:transparent;font-size:0}
-.menu-toggle:before{content:"";width:17px;height:2px;background:var(--ink);
+.menu-toggle{display:none;align-items:center;justify-content:center;flex:0 0 44px;
+             width:44px;height:44px;padding:0;border:0;background:transparent;line-height:1}
+.menu-toggle:before{content:"";display:block;flex:none;width:17px;height:2px;background:var(--ink);
                     box-shadow:0 -6px 0 var(--ink),0 6px 0 var(--ink)}
 
 /* ------------------------------------------------------------- catalog menu */
@@ -617,7 +617,7 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
 }
 @media(max-width:900px){
   .nav-links,.lang-btn,.nav-actions .whatsapp-btn{display:none}
-  .menu-toggle{display:grid;place-items:center}
+  .menu-toggle{display:flex}
   .mobile-nav{position:absolute;top:calc(100% + 1px);left:16px;right:16px;z-index:60;
     display:none;grid-template-columns:1fr;background:var(--surface);
     border:1px solid var(--line);box-shadow:0 18px 38px rgba(16,16,16,.16);padding:10px}
@@ -705,7 +705,7 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
   <div class="nav-actions">
     <button class="lang-btn" id="langBtn" type="button"><strong>EN</strong><span>/</span><span>中文</span></button>
     <a class="whatsapp-btn" href="https://wa.me/8613059352142" target="_blank" rel="noreferrer">WhatsApp ↗</a>
-    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false">☰</button>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false"></button>
   </div>
 </div>
 <div class="mobile-nav" id="mobileNav"></div></header>
