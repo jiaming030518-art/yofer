@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.27/dist/lenis.css">
 <style>
 /* ============================================================================
    YOFER — one design system.
@@ -602,11 +603,6 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
   box-shadow:0 12px 30px rgba(16,16,16,.2)}
 .floating-wa:hover{background:var(--ink);color:#fff}
 
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.reveal{opacity:0;transform:translateY(22px);
-  transition:opacity .7s cubic-bezier(.2,.75,.25,1),transform .7s cubic-bezier(.2,.75,.25,1)}
-.reveal.is-visible{opacity:1;transform:none}
-
 /* ============================== responsive ============================== */
 @media(max-width:1024px){
   .cap-grid{grid-template-columns:1fr 1fr}
@@ -709,7 +705,6 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
     scroll-behavior:auto!important;transition-duration:.01ms!important}
-  .reveal{opacity:1;transform:none}
 }
 </style>
 </head>
@@ -955,6 +950,9 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
 </div></footer>
 <a class="floating-wa" href="https://wa.me/8613059352142" target="_blank" rel="noreferrer" aria-label="Direct message on WhatsApp">DM</a>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.27/dist/lenis.min.js"></script>
 <script>
 
     const img = {
@@ -1060,6 +1058,8 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
     const countries=['United States','Canada','Mexico','Turkey','Kazakhstan','Uzbekistan','Russia','Ukraine','Romania','Germany','United Kingdom','France','Sweden','Finland','Thailand','Philippines','Cambodia','Malaysia','Singapore','Australia'];
     const state={lang:'en',slide:0,model:null,pause:false,autoplay:true,catalogBrand:'all'};
     const reducedMotion=window.matchMedia('(prefers-reduced-motion:reduce)');
+    let lenis=null;
+    let scrollAnimationContext=null;
     const t=(en,zh)=>state.lang==='en'?en:zh;
     function allCatalogModels(){return catalog.flatMap(b=>b.models.map(m=>({...m,brand:b.brand})))}
     function allModels(){return allCatalogModels().filter(m=>m.hasDetail)}
@@ -1340,19 +1340,30 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
     function showRoute(){
       const hash=location.hash||'#home';
       const isModel=hash.startsWith('#model=');
+      scrollAnimationContext?.revert();
+      scrollAnimationContext=null;
       document.querySelectorAll('.page-view').forEach(view=>view.classList.remove('active'));
       document.body.classList.toggle('model-route',isModel);
+      let activeView;
       if(isModel){
-        document.getElementById('modelView').classList.add('active');
+        activeView=document.getElementById('modelView');
+        activeView.classList.add('active');
         renderModel(hash.split('=')[1]);
       }else{
         const route=hash==='#wechatQR'?'contact':hash.replace('#','')||'home';
-        const view=document.getElementById(`${route}View`)||document.getElementById('homeView');
-        view.classList.add('active');
+        activeView=document.getElementById(`${route}View`)||document.getElementById('homeView');
+        activeView.classList.add('active');
         if(route==='home')renderHero();
       }
-      if(hash==='#wechatQR')document.getElementById('wechatQR').scrollIntoView({block:'center',behavior:reducedMotion.matches?'instant':'smooth'});
-      else window.scrollTo({top:0,behavior:reducedMotion.matches?'instant':'smooth'});
+      const routeTarget=hash==='#wechatQR'?document.getElementById('wechatQR'):0;
+      const finishRouteScroll=()=>initScrollAnimations(activeView);
+      if(lenis){
+        lenis.scrollTo(routeTarget,{offset:hash==='#wechatQR'?-window.innerHeight*.18:0,duration:.8,onComplete:finishRouteScroll});
+      }else{
+        if(hash==='#wechatQR')routeTarget.scrollIntoView({block:'center',behavior:reducedMotion.matches?'instant':'smooth'});
+        else window.scrollTo({top:0,behavior:reducedMotion.matches?'instant':'smooth'});
+        requestAnimationFrame(finishRouteScroll);
+      }
       document.getElementById('catalogMenu').classList.remove('open');
       document.getElementById('catalogTrigger').setAttribute('aria-expanded','false');
       closeMobileNav();
@@ -1399,8 +1410,29 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
     function mountMarketExperience(mapId,listId,resultId){const list=document.getElementById(listId);const wrap=list?.closest('.export-wrap');const map=wrap?.querySelector('.world-map');if(!list||!wrap||!map)return;map.id=mapId;map.classList.add('market-map');map.setAttribute('aria-label','Interactive world export market map');map.innerHTML='<div class="map-toolbar"><span class="map-status">Interactive export map</span><span class="map-status">Choose a country</span></div><div class="market-map-canvas"><img class="market-map-image" src="assets/world.svg" alt="World map showing YOFER export markets" draggable="false"><img class="market-map-highlight" src="assets/market-highlights/us.svg" alt="United States highlighted on the export market map" draggable="false"></div><p class="map-attribution">World map: <a href="https://github.com/VictorCazanave/svg-maps" target="_blank" rel="noreferrer">svg-maps</a> · CC BY 4.0</p>';const panel=list.parentElement;panel.classList.add('market-panel');const hint=document.createElement('p');hint.className='market-instruction';hint.textContent='Choose a country to highlight it on the map and see a featured model.';list.before(hint);const result=document.createElement('div');result.className='market-result';result.id=resultId;result.setAttribute('aria-live','polite');list.after(result);renderMarketCountries(listId);initMarketMap(mapId)}
     function renderChenjiamingPortraits(){const photo='assets/chenjiaming.jpg';document.querySelectorAll('.portrait').forEach(portrait=>{portrait.innerHTML=`<img src="${photo}" alt="Chenjiaming, Sales Manager at YOFER">`});const qrGrid=document.querySelector('#contactView .qr-grid');if(qrGrid&&!qrGrid.querySelector('.contact-person')){const card=document.createElement('div');card.className='contact-person';card.innerHTML=`<img src="${photo}" alt="Chenjiaming, Sales Manager at YOFER"><div class="contact-person-copy"><span>Your direct contact</span><strong>Chenjiaming</strong><small>Sales Manager at YOFER</small></div>`;qrGrid.prepend(card)}}
     function renderYoferWordmarks(){const wordmark='<svg class="yofer-wordmark" viewBox="0 0 746 166" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><use href="#yofer-wordmark"></use></svg>';document.querySelectorAll('.contact-logo').forEach(logo=>{logo.setAttribute('role','img');logo.setAttribute('aria-label','YOFER Innovative Body Kit');logo.innerHTML=wordmark})}
-    function initReveal(){const items=document.querySelectorAll('#homeView section');if(!('IntersectionObserver' in window)){items.forEach(item=>item.classList.add('is-visible'));return}items.forEach(item=>item.classList.add('reveal'));const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target)}})},{rootMargin:'0px 0px -4% 0px',threshold:.04});items.forEach(item=>observer.observe(item))}
+    function initSmoothScroll(){
+      if(reducedMotion.matches||!window.Lenis||!window.gsap||!window.ScrollTrigger)return;
+      gsap.registerPlugin(ScrollTrigger);
+      lenis=new Lenis({autoRaf:false,lerp:.09,smoothWheel:true,syncTouch:false});
+      lenis.on('scroll',ScrollTrigger.update);
+      gsap.ticker.add(time=>lenis.raf(time*1000));
+      gsap.ticker.lagSmoothing(0);
+    }
+    function initScrollAnimations(view){
+      if(reducedMotion.matches||!view||!window.gsap||!window.ScrollTrigger)return;
+      gsap.registerPlugin(ScrollTrigger);
+      const sections=[...view.querySelectorAll('section')].filter(section=>!section.classList.contains('hero'));
+      if(!sections.length)return;
+      scrollAnimationContext=gsap.context(()=>{
+        sections.forEach(section=>gsap.fromTo(section,
+          {autoAlpha:0,y:22},
+          {autoAlpha:1,y:0,duration:.78,ease:'power2.out',scrollTrigger:{trigger:section,start:'top 86%',once:true}}
+        ));
+      },view);
+      ScrollTrigger.refresh();
+    }
     renderYoferWordmarks();
+    initSmoothScroll();
     renderChenjiamingPortraits();renderCatalogMenu();renderModels();mountMarketExperience('marketMapHome','countryList','marketResult');mountMarketExperience('marketMapCompany','countryListCompany','marketResultCompany');document.querySelectorAll('.market-result').forEach(result=>{const list=result.parentElement.querySelector('.country-list');if(list)list.before(result)});selectMarket(state.market);renderHero();initAllCompares();setInterval(()=>{const slides=heroSlides();if(!reducedMotion.matches&&state.autoplay&&!state.pause&&!document.hidden&&document.getElementById('homeView').classList.contains('active'))setSlide((state.slide+1)%slides.length)},5500);showRoute();
 </script>
 </body>
