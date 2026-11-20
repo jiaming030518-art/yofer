@@ -605,22 +605,23 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
   font-family:"DM Mono",monospace;font-size:.75rem;letter-spacing:.04em;color:var(--ink-2)}
 .floating-wa{--wa-green:#25d366;position:fixed;z-index:25;isolation:isolate;
   right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));
-  display:flex;align-items:center;justify-content:center;gap:10px;min-width:132px;padding:12px 16px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:clamp(112px,calc(104px + 2vw),124px);min-height:44px;padding:8px 10px;
   border-radius:999px;background:var(--wa-green);color:#fff;
-  font:700 14px/1 system-ui,sans-serif;white-space:nowrap;
-  box-shadow:0 20px 25px -5px #0003,0 8px 10px -6px #0003;
+  font:700 13px/1 system-ui,sans-serif;white-space:nowrap;
+  box-shadow:0 12px 18px -5px #0003,0 5px 8px -4px #0003;
   animation:wa-breathe 8s ease infinite}
 .floating-wa::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
   border-radius:inherit;background:var(--wa-green);opacity:.2;
   animation:wa-ring 1s cubic-bezier(0,0,.2,1) infinite}
-.floating-wa svg{width:20px;height:20px;flex:none}
+.floating-wa svg{width:18px;height:18px;flex:none}
 .floating-wa-label{display:flex;flex-direction:column;align-items:start}
-.floating-wa-label span{font-size:11px;opacity:.8}
+.floating-wa-label span{font-size:10px;opacity:.8}
 .floating-wa-label strong{font-weight:inherit}
 .floating-wa:hover{background:#1ebe5b}
 .floating-wa:active{transform:scale(.95)}
-@keyframes wa-ring{75%,100%{transform:scale(2);opacity:0}}
-@keyframes wa-breathe{0%,87.5%,100%{scale:1} 91.25%,96.25%{scale:1.1}}
+@keyframes wa-ring{75%,100%{transform:scale(1.6);opacity:0}}
+@keyframes wa-breathe{0%,87.5%,100%{scale:1} 91.25%,96.25%{scale:1.07}}
 
 /* ============================== responsive ============================== */
 @media(max-width:1024px){
