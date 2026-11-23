@@ -86,15 +86,13 @@ a,button{transition:color .2s ease,background-color .2s ease,border-color .2s ea
 .nav{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2);height:72px}
 .brand.yofer-lockup{width:132px;color:var(--ink);line-height:0;flex:0 0 auto}
 .brand.yofer-lockup .yofer-wordmark{width:100%;height:auto}
-.nav-links{display:flex;align-items:center;gap:var(--s-2);font-size:.82rem;font-weight:600}
+.nav-links{position:relative;display:flex;align-items:center;gap:var(--s-2);font-size:.82rem;font-weight:600}
 .nav-links>a,.catalog-trigger{color:var(--ink-2);position:relative;padding:6px 0}
-.nav-links>a:hover,.catalog-trigger:hover{color:var(--ink)}
-.nav-links>a:after,.catalog-trigger:after{
-  content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;
-  background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .2s}
-.nav-links>a:hover:after,.catalog-trigger:hover:after{transform:scaleX(1)}
-.nav-links [aria-current="page"]{color:var(--ink)}
-.nav-links [aria-current="page"]:after{transform:scaleX(1)}
+.nav-links a:is(:hover,:focus-visible,[aria-current="page"]){color:var(--ink)}
+.nav-indicator{position:absolute;left:0;bottom:0;width:1px;height:2px;border-radius:1px;
+  background:var(--accent);pointer-events:none;transform-origin:left center;
+  transform:translateX(var(--nav-x)) scaleX(var(--nav-width));
+  transition:transform .26s cubic-bezier(.22,1,.36,1)}
 .nav-actions{display:flex;align-items:center;gap:14px}
 .lang-btn{font-family:"DM Mono",monospace;font-size:.72rem;letter-spacing:.06em;
           color:var(--ink-2);display:inline-flex;gap:4px}
@@ -105,8 +103,15 @@ a,button{transition:color .2s ease,background-color .2s ease,border-color .2s ea
 .whatsapp-btn:hover{background:var(--accent-ink);color:#fff}
 .menu-toggle{display:none;align-items:center;justify-content:center;flex:0 0 44px;
              width:44px;height:44px;padding:0;border:0;background:transparent;line-height:1}
-.menu-toggle:before{content:"";display:block;flex:none;width:17px;height:2px;background:var(--ink);
-                    box-shadow:0 -6px 0 var(--ink),0 6px 0 var(--ink)}
+.menu-toggle-icon{position:relative;width:17px;height:2px;flex:none}
+.menu-toggle-icon::before,.menu-toggle-icon::after,.menu-toggle-icon span{
+  position:absolute;inset:0;background:var(--ink);transition:transform .22s ease,opacity .15s ease}
+.menu-toggle-icon::before,.menu-toggle-icon::after{content:""}
+.menu-toggle-icon::before{transform:translateY(-6px)}
+.menu-toggle-icon::after{transform:translateY(6px)}
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon::before{transform:rotate(45deg)}
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon::after{transform:rotate(-45deg)}
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon span{opacity:0;transform:scaleX(.35)}
 
 /* ------------------------------------------------------------- catalog menu */
 .catalog-shell{position:relative;display:flex;align-items:center}
@@ -648,12 +653,16 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
   .nav-links,.lang-btn,.nav-actions .whatsapp-btn{display:none}
   .menu-toggle{display:flex}
   .mobile-nav{position:absolute;top:calc(100% + 1px);left:16px;right:16px;z-index:60;
-    display:none;grid-template-columns:1fr;background:var(--surface);
-    border:1px solid var(--line);box-shadow:0 18px 38px rgba(16,16,16,.16);padding:10px}
-  .mobile-nav.open{display:grid}
+    display:grid;grid-template-columns:1fr;background:var(--surface);
+    border:1px solid var(--line);box-shadow:0 18px 38px rgba(16,16,16,.16);padding:10px;
+    max-height:calc(100dvh - 112px);overflow-y:auto;overscroll-behavior:contain;
+    visibility:hidden;opacity:0;pointer-events:none;transform:translateY(-8px);
+    transition:opacity .18s ease,transform .22s cubic-bezier(.22,1,.36,1),visibility 0s .22s}
+  .mobile-nav.open{visibility:visible;opacity:1;pointer-events:auto;transform:none;transition-delay:0s}
   .mobile-nav a,.mobile-nav button{display:flex;align-items:center;justify-content:space-between;
     min-height:48px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);
     font-size:.84rem;color:var(--ink)}
+  .mobile-nav a[aria-current="page"]{background:var(--paper);color:var(--accent-ink);font-weight:700}
   .mobile-nav>*:last-child{border-bottom:0}
   .catalog-menu{left:auto;right:0;transform:none;grid-template-columns:repeat(2,minmax(0,1fr))}
   #catalogView .catalog-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -729,6 +738,7 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
     scroll-behavior:auto!important;transition-duration:.01ms!important}
   .floating-wa,.floating-wa::before{animation:none}
+  .mobile-nav{transition-delay:0s}
 }
 </style>
 </head>
@@ -744,7 +754,7 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
   <a class="brand yofer-lockup" href="#home" data-route="home" aria-label="YOFER home">
     <svg class="yofer-wordmark" viewBox="0 0 746 166" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false"><use href="#yofer-wordmark"></use></svg>
   </a>
-  <nav class="nav-links">
+  <nav class="nav-links" aria-label="Main navigation">
     <a href="#home" data-route="home">Home</a>
     <div class="catalog-shell">
       <a class="catalog-trigger" id="catalogTrigger" href="#catalog" data-route="catalog">Product Catalog <span aria-hidden="true">↗</span></a>
@@ -753,14 +763,15 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
     <a href="#about" data-route="about">About Me</a>
     <a href="#company" data-route="company">Company</a>
     <a href="#contact" data-route="contact">Contact</a>
+    <span class="nav-indicator" aria-hidden="true" hidden></span>
   </nav>
   <div class="nav-actions">
     <button class="lang-btn" id="langBtn" type="button"><strong>EN</strong><span>/</span><span>中文</span></button>
     <a class="whatsapp-btn" href="https://wa.me/8613059352142" target="_blank" rel="noreferrer">WhatsApp ↗</a>
-    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false"></button>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open menu" aria-controls="mobileNav" aria-expanded="false"><span class="menu-toggle-icon" aria-hidden="true"><span></span></span></button>
   </div>
 </div>
-<div class="mobile-nav" id="mobileNav"></div></header>
+<nav class="mobile-nav" id="mobileNav" aria-label="Main navigation" data-lenis-prevent inert></nav></header>
 
 <main>
   <div class="page-view active" id="homeView">
@@ -1343,12 +1354,43 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
       scope.querySelectorAll('.compare-shell').forEach(initCompare);
     }
     function bindRoute(el){if(el.dataset.routeBound)return;el.dataset.routeBound='true';el.addEventListener('click',e=>{e.preventDefault();const route=el.dataset.route;const slug=el.dataset.slug;const hash=route==='model'?`#model=${slug}`:`#${route}`;history.pushState({},'',hash);showRoute()})}
-    function closeMobileNav(){
-      const menu=document.getElementById('mobileNav');
-      const toggle=document.getElementById('menuToggle');
-      menu.classList.remove('open');
-      toggle.setAttribute('aria-expanded','false');
-      toggle.setAttribute('aria-label','Open menu');
+    const desktopNav=document.querySelector('.nav-links');
+    const desktopNavLinks=[...desktopNav.querySelectorAll(':scope > a, .catalog-trigger')];
+    const navIndicator=desktopNav.querySelector('.nav-indicator');
+    let hoveredNavLink=null;
+    let focusedNavLink=null;
+    function syncNavIndicator(){
+      const link=hoveredNavLink||focusedNavLink||desktopNavLinks.find(item=>item.hasAttribute('aria-current'));
+      if(!link||!desktopNav.offsetWidth){navIndicator.hidden=true;return}
+      const bounds=link.getBoundingClientRect();
+      navIndicator.style.setProperty('--nav-x',`${bounds.left-desktopNav.getBoundingClientRect().left}px`);
+      navIndicator.style.setProperty('--nav-width',bounds.width);
+      navIndicator.hidden=false;
+    }
+    desktopNavLinks.forEach(link=>link.addEventListener('pointerenter',event=>{
+      if(event.pointerType==='touch')return;
+      hoveredNavLink=link;
+      syncNavIndicator();
+    }));
+    desktopNav.addEventListener('pointerleave',()=>{hoveredNavLink=null;syncNavIndicator()});
+    desktopNav.addEventListener('focusin',event=>{
+      focusedNavLink=desktopNavLinks.includes(event.target)&&event.target.matches(':focus-visible')?event.target:null;
+      syncNavIndicator();
+    });
+    desktopNav.addEventListener('focusout',()=>{focusedNavLink=null;syncNavIndicator()});
+    if('ResizeObserver' in window){
+      const navResize=new ResizeObserver(syncNavIndicator);
+      navResize.observe(desktopNav);
+      desktopNavLinks.forEach(link=>navResize.observe(link));
+    }
+    const mobileNav=document.getElementById('mobileNav');
+    const menuToggle=document.getElementById('menuToggle');
+    function setMobileNav(open){
+      if(!open&&mobileNav.contains(document.activeElement)&&menuToggle.offsetWidth)menuToggle.focus({preventScroll:true});
+      mobileNav.inert=!open;
+      mobileNav.classList.toggle('open',open);
+      menuToggle.setAttribute('aria-expanded',String(open));
+      menuToggle.setAttribute('aria-label',open?'Close menu':'Open menu');
     }
     function languageMarkup(mobile=false){
       if(state.lang==='en')return mobile?'<span><strong>EN</strong> / 中文</span><span aria-hidden="true">↔</span>':'<strong>EN</strong><span>/</span><span>中文</span>';
@@ -1401,25 +1443,25 @@ footer{padding:var(--s-2) 0;border-top:1px solid var(--line)}
       }
       document.getElementById('catalogMenu').classList.remove('open');
       document.getElementById('catalogTrigger').setAttribute('aria-expanded','false');
-      closeMobileNav();
+      setMobileNav(false);
       const activeRoute=isModel?'catalog':(document.querySelector('.page-view.active')?.id.replace('View','')||'home');
       document.querySelectorAll('.nav-links [data-route],.mobile-nav [data-route]').forEach(link=>{
         if(link.dataset.route===activeRoute)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
       });
+      hoveredNavLink=focusedNavLink=null;
+      syncNavIndicator();
     }
     document.getElementById('langBtn').addEventListener('click',toggleLanguage);
-    document.getElementById('menuToggle').addEventListener('click',()=>{
-      const menu=document.getElementById('mobileNav');
-      const open=!menu.classList.contains('open');
-      menu.classList.toggle('open',open);
-      document.getElementById('menuToggle').setAttribute('aria-expanded',open?'true':'false');
-      document.getElementById('menuToggle').setAttribute('aria-label',open?'Close menu':'Open menu');
+    menuToggle.addEventListener('click',()=>setMobileNav(mobileNav.inert));
+    window.matchMedia('(max-width:900px)').addEventListener('change',()=>{
+      hoveredNavLink=focusedNavLink=null;
+      setMobileNav(false);
+      syncNavIndicator();
     });
-    window.addEventListener('resize',()=>{if(window.innerWidth>900)closeMobileNav()});
     document.addEventListener('keydown',event=>{
-      if(event.key==='Escape'&&document.getElementById('mobileNav').classList.contains('open')){closeMobileNav();document.getElementById('menuToggle').focus()}
+      if(event.key==='Escape'&&!mobileNav.inert){setMobileNav(false);menuToggle.focus({preventScroll:true})}
     });
-    document.addEventListener('click',event=>{if(!event.target.closest('.site-header'))closeMobileNav()});
+    document.addEventListener('click',event=>{if(!event.target.closest('.site-header'))setMobileNav(false)});
     const homeHero=document.querySelector('#homeView .hero');
     homeHero.addEventListener('mouseenter',()=>state.pause=true);
     homeHero.addEventListener('mouseleave',()=>state.pause=false);
